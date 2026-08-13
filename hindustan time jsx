@@ -1,0 +1,498 @@
+import React, { useState, useMemo } from "react";
+
+/* ---------------------------------------------------------
+   MOCK CONTENT
+--------------------------------------------------------- */
+const CATEGORIES = ["Home","India","World","Politics","Business","Sports","Entertainment","Technology","Opinion"];
+
+const TICKER = [
+  "Parliament passes new data protection amendment bill",
+  "Sensex closes 412 points higher on IT rally",
+  "Monsoon session to begin next week, sources say",
+  "India beat Australia by 6 wickets in 2nd ODI",
+  "RBI holds repo rate steady at 6.5% for third straight meet",
+];
+
+const HERO = {
+  tag: "Politics",
+  headline: "Parliament clears landmark data bill after marathon debate",
+  excerpt:
+    "The bill, which sets new rules for how citizen data is stored and shared, passed after twelve hours of floor debate and two rounds of amendments from the opposition benches.",
+  author: "Aritra Sen",
+  time: "2 hours ago",
+  img: "https://picsum.photos/seed/hindusthan-hero/1200/800",
+};
+
+const SECONDARY = [
+  { tag: "World", headline: "Border talks resume after six-month freeze", time: "1h ago", img: "https://picsum.photos/seed/htw1/400/300" },
+  { tag: "Business", headline: "Rupee steadies as crude prices ease", time: "3h ago", img: "https://picsum.photos/seed/htw2/400/300" },
+  { tag: "Sports", headline: "Selectors name 15-man squad for tour", time: "4h ago", img: "https://picsum.photos/seed/htw3/400/300" },
+];
+
+const GRID = [
+  { tag: "Technology", headline: "Homegrown chipmaker unveils first 5nm prototype", time: "5h ago", img: "https://picsum.photos/seed/htg1/500/340" },
+  { tag: "Entertainment", headline: "Festival opener breaks opening-week record", time: "6h ago", img: "https://picsum.photos/seed/htg2/500/340" },
+  { tag: "India", headline: "Metro line 4 to open ahead of schedule", time: "7h ago", img: "https://picsum.photos/seed/htg3/500/340" },
+  { tag: "Opinion", headline: "Why the new labour codes need a rethink", time: "8h ago", img: "https://picsum.photos/seed/htg4/500/340" },
+  { tag: "World", headline: "Coastal cities brace for early cyclone season", time: "9h ago", img: "https://picsum.photos/seed/htg5/500/340" },
+  { tag: "Business", headline: "Startup funding rebounds after two slow quarters", time: "10h ago", img: "https://picsum.photos/seed/htg6/500/340" },
+];
+
+const TRENDING = [
+  "Data bill: what changes for you, explained",
+  "Heatwave alert issued for six states",
+  "Central bank minutes hint at pause",
+  "Transfer window: five deals to watch",
+  "Explainer: the new education framework",
+];
+
+const MOST_READ = [
+  "Why onion prices are spiking again",
+  "The quiet rise of India's EV suburbs",
+  "Inside the border talks: a timeline",
+  "Five charts on this quarter's GDP",
+  "What the new visa rules mean for you",
+];
+
+const EDITORS_PICKS = [
+  { headline: "The unfinished business of the water bill", time: "Long read" },
+  { headline: "Inside a small-town newsroom, ten years on", time: "Feature" },
+  { headline: "The economics of the monsoon", time: "Analysis" },
+];
+
+const SECTIONS = {
+  Sports: [
+    { headline: "Squad announced for the away tour", time: "2h ago", img: "https://picsum.photos/seed/hts1/400/280" },
+    { headline: "Youngster earns maiden call-up", time: "4h ago", img: "https://picsum.photos/seed/hts2/400/280" },
+    { headline: "League table: title race tightens", time: "6h ago", img: "https://picsum.photos/seed/hts3/400/280" },
+    { headline: "Injury update ahead of Saturday's derby", time: "9h ago", img: "https://picsum.photos/seed/hts4/400/280" },
+  ],
+  Business: [
+    { headline: "Markets rally on cooling inflation data", time: "1h ago", img: "https://picsum.photos/seed/htb1/400/280" },
+    { headline: "Manufacturing PMI hits an 8-month high", time: "3h ago", img: "https://picsum.photos/seed/htb2/400/280" },
+    { headline: "IPO window reopens for mid-cap firms", time: "5h ago", img: "https://picsum.photos/seed/htb3/400/280" },
+    { headline: "Retailers report a strong festive quarter", time: "7h ago", img: "https://picsum.photos/seed/htb4/400/280" },
+  ],
+};
+
+/* ---------------------------------------------------------
+   SMALL PIECES
+--------------------------------------------------------- */
+function Ribbon({ children }) {
+  return <span className="ribbon">{children}</span>;
+}
+
+function ArticleCard({ img, tag, headline, time, size = "md" }) {
+  return (
+    <article className={`card card-${size}`}>
+      <div className="card-media">
+        <img src={img} alt="" loading="lazy" />
+        <Ribbon>{tag}</Ribbon>
+      </div>
+      <h3 className="card-headline">{headline}</h3>
+      <p className="card-meta">{time}</p>
+    </article>
+  );
+}
+
+function SectionDivider({ title }) {
+  return (
+    <div className="section-divider">
+      <span className="section-divider-label">{title}</span>
+      <span className="section-divider-line" />
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------
+   MAIN COMPONENT
+--------------------------------------------------------- */
+export default function HindusthanTime() {
+  const [dark, setDark] = useState(false);
+  const [active, setActive] = useState("Home");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  const today = useMemo(
+    () =>
+      new Date().toLocaleDateString("en-IN", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+    []
+  );
+
+  return (
+    <div className={dark ? "ht dark" : "ht"}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&display=swap');
+
+        .ht {
+          --ink: #1c1712;
+          --paper: #f3ede0;
+          --paper-dim: #e9e0c9;
+          --maroon: #7a1f2b;
+          --maroon-dark: #591620;
+          --gold: #a97a2c;
+          --gray: #6b6459;
+          --rule: #d3c6a4;
+          --card-bg: #ffffff;
+          font-family: 'Source Serif 4', Georgia, serif;
+          background: var(--paper);
+          color: var(--ink);
+          min-height: 100vh;
+          transition: background .25s ease, color .25s ease;
+        }
+        .ht.dark {
+          --ink: #efe6d3;
+          --paper: #161210;
+          --paper-dim: #1e1a16;
+          --maroon: #c94a57;
+          --maroon-dark: #a53744;
+          --gold: #d3a24f;
+          --gray: #a89c85;
+          --rule: #3a3226;
+          --card-bg: #201b17;
+        }
+        .ht * { box-sizing: border-box; }
+        .ht a { color: inherit; text-decoration: none; }
+        .ht img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+        .util-bar {
+          display: flex; justify-content: space-between; align-items: center;
+          font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: .04em;
+          color: var(--gray); padding: 6px 24px; border-bottom: 1px solid var(--rule);
+        }
+        .util-bar button {
+          font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+          letter-spacing: .06em; text-transform: uppercase; background: none;
+          border: 1px solid var(--rule); color: var(--ink); padding: 4px 10px;
+          border-radius: 2px; cursor: pointer;
+        }
+        .util-bar .util-right { display: flex; gap: 8px; align-items: center; }
+
+        .masthead {
+          text-align: center; padding: 22px 20px 14px; position: relative;
+        }
+        .masthead .kicker {
+          font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: .18em;
+          text-transform: uppercase; color: var(--gray);
+        }
+        .masthead h1 {
+          font-family: 'Playfair Display', serif; font-weight: 900;
+          font-size: clamp(34px, 6vw, 64px); letter-spacing: -.01em;
+          margin: 6px 0 4px; color: var(--maroon);
+        }
+        .masthead .tagline {
+          font-style: italic; color: var(--gray); font-size: 14px;
+        }
+        .masthead-rule {
+          border: none; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink);
+          height: 5px; margin: 14px 0 0;
+        }
+
+        .search-row { max-width: 480px; margin: 14px auto 0; display: flex; gap: 8px; }
+        .search-row input {
+          flex: 1; font-family: 'Inter', sans-serif; font-size: 14px;
+          padding: 8px 12px; border: 1px solid var(--rule); background: var(--card-bg); color: var(--ink);
+          border-radius: 2px;
+        }
+
+        nav.main-nav {
+          display: flex; justify-content: center; gap: 2px; flex-wrap: wrap;
+          padding: 10px 12px; border-bottom: 1px solid var(--rule);
+          font-family: 'Inter', sans-serif;
+        }
+        nav.main-nav button {
+          background: none; border: none; cursor: pointer; color: var(--ink);
+          font-size: 13px; font-weight: 600; letter-spacing: .03em; padding: 6px 12px;
+          text-transform: uppercase; border-bottom: 2px solid transparent;
+        }
+        nav.main-nav button.active { color: var(--maroon); border-bottom-color: var(--maroon); }
+
+        .ticker-wrap {
+          background: var(--maroon); color: #fff; display: flex; align-items: center;
+          overflow: hidden; font-family: 'Inter', sans-serif;
+        }
+        .ticker-label {
+          flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+          font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+          background: var(--maroon-dark); padding: 8px 14px;
+        }
+        .ticker-dot {
+          width: 7px; height: 7px; border-radius: 50%; background: #fff;
+          animation: pulse 1.4s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+        .ticker-track { display: flex; white-space: nowrap; animation: scroll 32s linear infinite; }
+        .ticker-track span { padding: 8px 40px 8px 0; font-size: 13px; }
+        @keyframes scroll { from { transform: translateX(0);} to { transform: translateX(-50%);} }
+
+        .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+        .ribbon {
+          position: absolute; top: 10px; left: 0;
+          background: var(--maroon); color: #fff; font-family: 'Inter', sans-serif;
+          font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+          padding: 4px 10px 4px 8px;
+          clip-path: polygon(0 0, 100% 0, 88% 100%, 0% 100%);
+        }
+
+        .hero-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 28px; padding: 32px 0 12px; }
+        .hero-media { position: relative; aspect-ratio: 16/10; overflow: hidden; margin-bottom: 14px; }
+        .hero-headline { font-family: 'Playfair Display', serif; font-weight: 800; font-size: clamp(26px,3vw,38px); line-height: 1.12; margin: 0 0 10px; }
+        .hero-excerpt { color: var(--gray); font-size: 16px; line-height: 1.6; margin-bottom: 10px; }
+        .hero-byline { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: .04em; }
+
+        .secondary-list { display: flex; flex-direction: column; gap: 18px; }
+        .secondary-item { display: grid; grid-template-columns: 96px 1fr; gap: 12px; }
+        .secondary-item .thumb { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+        .secondary-item h4 { font-family: 'Playfair Display', serif; font-size: 16px; line-height: 1.25; margin: 0 0 4px; }
+        .secondary-item .card-meta { margin: 0; }
+
+        .card-meta { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--gray); letter-spacing: .03em; text-transform: uppercase; margin-top: 4px; }
+        .card-headline { font-family: 'Playfair Display', serif; font-size: 18px; line-height: 1.28; margin: 10px 0 0; }
+
+        .main-split { display: grid; grid-template-columns: 2.2fr 1fr; gap: 36px; padding: 20px 0 8px; align-items: start; }
+        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 22px; }
+        .card-media { position: relative; aspect-ratio: 3/2; overflow: hidden; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 26px; }
+        .side-box { border: 1px solid var(--rule); background: var(--card-bg); padding: 16px 18px; }
+        .side-box h5 {
+          font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+          text-transform: uppercase; color: var(--maroon); margin: 0 0 12px; border-bottom: 2px solid var(--maroon);
+          padding-bottom: 8px;
+        }
+        .side-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+        .side-list li { display: flex; gap: 10px; align-items: baseline; font-size: 14px; line-height: 1.35; }
+        .side-num { font-family: 'Playfair Display', serif; font-weight: 800; color: var(--gold); font-size: 18px; flex-shrink: 0; }
+        .picks li { font-family: 'Playfair Display', serif; font-size: 15px; }
+        .picks .card-meta { display: block; margin-top: 2px; }
+
+        .section-divider { display: flex; align-items: center; gap: 12px; margin: 44px 0 20px; }
+        .section-divider-label {
+          font-family: 'Playfair Display', serif; font-weight: 800; font-size: 22px;
+          color: var(--maroon); white-space: nowrap;
+        }
+        .section-divider-line { flex: 1; height: 3px; background: var(--ink); position: relative; }
+        .section-divider-line::after {
+          content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px; background: var(--ink);
+        }
+
+        .newsletter {
+          margin-top: 52px; background: var(--maroon); color: #fff; padding: 40px 20px; text-align: center;
+        }
+        .newsletter h3 { font-family: 'Playfair Display', serif; font-size: 26px; margin: 0 0 8px; }
+        .newsletter p { font-family: 'Inter', sans-serif; font-size: 14px; opacity: .85; margin: 0 0 18px; }
+        .newsletter-form { display: flex; gap: 8px; max-width: 380px; margin: 0 auto; }
+        .newsletter-form input {
+          flex: 1; padding: 10px 14px; border: none; border-radius: 2px; font-family: 'Inter', sans-serif; font-size: 14px;
+        }
+        .newsletter-form button {
+          background: var(--ink); color: var(--paper); border: none; padding: 10px 18px;
+          font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .04em;
+          text-transform: uppercase; cursor: pointer; border-radius: 2px;
+        }
+        .newsletter-note { font-family: 'Inter', sans-serif; font-size: 12px; margin-top: 10px; opacity: .9; }
+
+        footer { border-top: 1px solid var(--rule); margin-top: 40px; padding: 36px 20px 24px; }
+        .footer-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 28px; font-family: 'Inter', sans-serif; }
+        .footer-grid h6 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--maroon); margin: 0 0 12px; }
+        .footer-grid ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--gray); }
+        .footer-bottom {
+          margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--rule);
+          display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+          font-family: 'Inter', sans-serif; font-size: 12px; color: var(--gray);
+        }
+        .footer-logo { font-family: 'Playfair Display', serif; font-weight: 900; color: var(--maroon); font-size: 20px; margin-bottom: 6px; }
+
+        @media (max-width: 860px) {
+          .hero-grid, .main-split, .footer-grid { grid-template-columns: 1fr; }
+          .grid-cards { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 560px) {
+          .grid-cards { grid-template-columns: 1fr; }
+          .secondary-item { grid-template-columns: 76px 1fr; }
+        }
+      `}</style>
+
+      {/* UTILITY BAR */}
+      <div className="util-bar">
+        <span>{today} · Jaipur Edition</span>
+        <div className="util-right">
+          <button onClick={() => setSearchOpen((s) => !s)}>{searchOpen ? "Close" : "Search"}</button>
+          <button onClick={() => setDark((d) => !d)}>{dark ? "Light mode" : "Dark mode"}</button>
+        </div>
+      </div>
+
+      {/* MASTHEAD */}
+      <header className="masthead">
+        <div className="kicker">Vol. I &nbsp;·&nbsp; No. 248 &nbsp;·&nbsp; Est. 2026</div>
+        <h1>Hindusthan Time</h1>
+        <div className="tagline">Your Daily Source of Truth</div>
+        {searchOpen && (
+          <div className="search-row">
+            <input
+              autoFocus
+              placeholder="Search Hindusthan Time…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+        )}
+        <hr className="masthead-rule" />
+      </header>
+
+      {/* NAV */}
+      <nav className="main-nav">
+        {CATEGORIES.map((c) => (
+          <button key={c} className={active === c ? "active" : ""} onClick={() => setActive(c)}>
+            {c}
+          </button>
+        ))}
+      </nav>
+
+      {/* TICKER */}
+      <div className="ticker-wrap">
+        <span className="ticker-label"><span className="ticker-dot" />Breaking</span>
+        <div className="ticker-track">
+          {[...TICKER, ...TICKER].map((t, i) => (
+            <span key={i}>{t}</span>
+          ))}
+        </div>
+      </div>
+
+      <main className="container">
+        {/* HERO */}
+        <section className="hero-grid">
+          <div>
+            <div className="hero-media">
+              <img src={HERO.img} alt="" />
+              <Ribbon>{HERO.tag}</Ribbon>
+            </div>
+            <h2 className="hero-headline">{HERO.headline}</h2>
+            <p className="hero-excerpt">{HERO.excerpt}</p>
+            <div className="hero-byline">By {HERO.author} · {HERO.time}</div>
+          </div>
+          <div className="secondary-list">
+            {SECONDARY.map((s, i) => (
+              <div className="secondary-item" key={i}>
+                <div className="thumb">
+                  <img src={s.img} alt="" />
+                </div>
+                <div>
+                  <p className="card-meta" style={{ marginTop: 0, color: "var(--maroon)" }}>{s.tag}</p>
+                  <h4>{s.headline}</h4>
+                  <p className="card-meta">{s.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* GRID + SIDEBAR */}
+        <div className="main-split">
+          <div className="grid-cards">
+            {GRID.map((g, i) => (
+              <ArticleCard key={i} {...g} />
+            ))}
+          </div>
+
+          <aside className="sidebar">
+            <div className="side-box">
+              <h5>Trending Now</h5>
+              <ul className="side-list">
+                {TRENDING.map((t, i) => (
+                  <li key={i}><span className="side-num">{String(i + 1).padStart(2, "0")}</span><span>{t}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div className="side-box">
+              <h5>Most Read</h5>
+              <ul className="side-list">
+                {MOST_READ.map((t, i) => (
+                  <li key={i}><span className="side-num">{String(i + 1).padStart(2, "0")}</span><span>{t}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div className="side-box">
+              <h5>Editor's Picks</h5>
+              <ul className="side-list picks">
+                {EDITORS_PICKS.map((p, i) => (
+                  <li key={i} style={{ display: "block" }}>
+                    {p.headline}
+                    <span className="card-meta">{p.time}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+        </div>
+
+        {/* CATEGORY SECTIONS */}
+        {Object.entries(SECTIONS).map(([name, items]) => (
+          <section key={name}>
+            <SectionDivider title={name} />
+            <div className="grid-cards" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+              {items.map((it, i) => (
+                <ArticleCard key={i} tag={name} {...it} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </main>
+
+      {/* NEWSLETTER */}
+      <div className="newsletter">
+        <h3>Never miss the morning edition</h3>
+        <p>A concise daily briefing, straight to your inbox by 7 AM.</p>
+        {subscribed ? (
+          <p className="newsletter-note">You're subscribed. See you tomorrow morning.</p>
+        ) : (
+          <form
+            className="newsletter-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSubscribed(true);
+            }}
+          >
+            <input type="email" required placeholder="you@example.com" />
+            <button type="submit">Subscribe</button>
+          </form>
+        )}
+      </div>
+
+      {/* FOOTER */}
+      <footer>
+        <div className="container footer-grid">
+          <div>
+            <div className="footer-logo">Hindusthan Time</div>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--gray)", maxWidth: 260 }}>
+              Independent daily coverage of national and international news, politics, business, sports and culture.
+            </p>
+          </div>
+          <div>
+            <h6>Company</h6>
+            <ul><li>About Us</li><li>Careers</li><li>Contact</li><li>Advertise</li></ul>
+          </div>
+          <div>
+            <h6>Legal</h6>
+            <ul><li>Privacy Policy</li><li>Terms of Use</li><li>Corrections Policy</li></ul>
+          </div>
+          <div>
+            <h6>Follow</h6>
+            <ul><li>Twitter / X</li><li>Instagram</li><li>Facebook</li><li>YouTube</li></ul>
+          </div>
+        </div>
+        <div className="container footer-bottom">
+          <span>© {new Date().getFullYear()} Hindusthan Time. All rights reserved.</span>
+          <span>Built for demonstration purposes.</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
